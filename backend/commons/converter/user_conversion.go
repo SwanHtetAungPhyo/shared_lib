@@ -23,7 +23,6 @@ func (uc *UserConverter) HttpToProto(user *models.User) *protos.UserRegisterRequ
 
 func (uc *UserConverter) ProtoToHttp(user *protos.UserRegisterRequest) *models.User {
 	return &models.User{
-		Id:       "1",
 		Email:    user.Email,
 		Username: user.Username,
 		Status:   "active",

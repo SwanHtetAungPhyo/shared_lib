@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option go_package = "github.com/ProjectSMAA/backend/commons/protos";
+
+package protos;
+
+service EmailServices {
+  rpc SendEmail(EmailRequest) returns (EmailResponse) {}
+}
+
+message EmailRequest {
+  string email = 1;
+}
+
+message  EmailResponse {
+  string successMessage =1;
+  string code = 2;
+}
