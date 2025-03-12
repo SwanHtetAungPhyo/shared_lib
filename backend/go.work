@@ -6,4 +6,5 @@ use (
 	./services/auth-service
 	./services/email-services
 	./services/kyc-service
+	services/chat-service
 )

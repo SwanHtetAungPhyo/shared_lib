@@ -59,3 +59,7 @@ run-app:
 git-sync:
 	@git add .
 	@git commit -m "Sync"
+
+git-pull-push:
+	@git pull origin main
+	@git push origin main

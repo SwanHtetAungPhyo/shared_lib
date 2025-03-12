@@ -9,10 +9,14 @@ type ServiceBlockHandler interface {
 	ListServiceBlocks(c fiber.Ctx) error
 }
 
+// BlocksHandler TODO: For digital asset
 type BlocksHandler struct {
 	Service ServiceBlockHandler
 }
 
+func NewBlocksHandler() *BlocksHandler {
+	return &BlocksHandler{}
+}
 func (h *BlocksHandler) CreateServiceOnPlatform(c fiber.Ctx) error {
 	return nil
 }
