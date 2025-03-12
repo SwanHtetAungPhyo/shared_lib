@@ -5,8 +5,8 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-// SetupUserRoutes defines user-related routes
 func SetupUserRoutes(app *fiber.App) {
-	app.Get("/user", handlers.GetUser)
-	app.Post("/user", handlers.RegisterUser)
+	useHandler := handlers.HandleConfig.UserHandle
+	app.Get("/user", useHandler.GetUser)
+	app.Post("/user", useHandler.RegisterUser)
 }

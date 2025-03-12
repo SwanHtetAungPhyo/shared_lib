@@ -1,20 +1,19 @@
 package grpc
 
 import (
-	"github.com/ProjectSMAA/commons/protos"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// gRPCClient establishes a connection to the gRPC server
-func gRPCClient() (*grpc.ClientConn, error) {
-	return grpc.Dial("localhost:5001", grpc.WithTransportCredentials(insecure.NewCredentials()))
+func gRPCClient(host, port string) (*grpc.ClientConn, error) {
+	return grpc.NewClient(host+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
 
-// CallGrpcService is a helper function to avoid repetition in gRPC calls
-func CallGrpcService[T any](clientFunc func(protos.UserServiceClient) (T, error)) (T, error) {
+func CallGrpcService[C any, T any](host, port string,
+	clientCreator func(conn grpc.ClientConnInterface) C,
+	call func(C) (T, error)) (T, error) {
 	var result T
-	conn, err := gRPCClient()
+	conn, err := gRPCClient(host, port)
 	if err != nil {
 		return result, err
 	}
@@ -25,6 +24,6 @@ func CallGrpcService[T any](clientFunc func(protos.UserServiceClient) (T, error)
 		}
 	}(conn)
 
-	client := protos.NewUserServiceClient(conn)
-	return clientFunc(client)
+	client := clientCreator(conn)
+	return call(client)
 }

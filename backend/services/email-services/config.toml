@@ -1,0 +1,5 @@
+[smtp]
+protocol = "smtp.gmail.com"
+port = 587
+email = "swanhtetaungp@gmail.com"
+password = "Swanhtet12@"

@@ -1,8 +1,9 @@
 go 1.24.0
 
 use (
-	./services/auth-service
 	./commons
 	./gateway
-	services/email-sevice
+	./services/auth-service
+	./services/email-services
+	./services/kyc-service
 )

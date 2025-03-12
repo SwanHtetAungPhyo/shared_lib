@@ -8,6 +8,7 @@ import (
 	"github.com/ProjectSMAA/commons/logging"
 	"log"
 	"net"
+	"os"
 
 	"github.com/ProjectSMAA/commons/protos" // Import your generated protobuf package
 	"google.golang.org/grpc"
@@ -18,10 +19,11 @@ func main() {
 	defer logging.ShutdownLogger()
 	database.ConnectDB()
 	database.Migration()
-	repo := repo.NewUserRepo()
-	service := services.NewAuthService(repo)
+	userRepo := repo.NewUserRepo()
+	service := services.NewAuthService(userRepo)
 	authServer := handler.NewServer(service)
-	listener, err := net.Listen("tcp", ":5001")
+	port := getEnv()
+	listener, err := net.Listen("tcp", ":"+port)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
@@ -32,4 +34,9 @@ func main() {
 	if err := server.Serve(listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+
+func getEnv() string {
+	port := os.Getenv("PORT")
+	return port
 }

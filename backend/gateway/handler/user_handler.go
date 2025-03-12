@@ -10,20 +10,35 @@ import (
 	"github.com/gofiber/fiber/v3"
 )
 
-// RegisterUser handles user registration
-func RegisterUser(c fiber.Ctx) error {
+type UserHandlerInterface interface {
+	RegisterUser(c fiber.Ctx) error
+	GetUser(c fiber.Ctx) error
+	CheckUser(c fiber.Ctx) error
+}
+type UsersHandler struct {
+	UserHandler UserHandlerInterface
+}
+
+func NewUsersHandler() *UsersHandler {
+	return &UsersHandler{}
+}
+
+func (u *UsersHandler) RegisterUser(c fiber.Ctx) error {
 	var user models.User
 	if err := c.Bind().Body(&user); err != nil {
 		return c.Status(400).SendString("Invalid request")
 	}
 
-	resp, err := grpc.CallGrpcService(func(client protos.UserServiceClient) (*protos.UserRegisteredResponse, error) {
-		return client.RegisterUser(context.Background(), &protos.UserRegisterRequest{
-			Email:    user.Email,
-			Username: user.Username,
-			Password: "<PASSWORD>",
+	resp, err := grpc.CallGrpcService("localhost",
+		"50051",
+		protos.NewUserServiceClient,
+		func(client protos.UserServiceClient) (*protos.UserRegisteredResponse, error) {
+			return client.RegisterUser(context.Background(), &protos.UserRegisterRequest{
+				Email:    user.Email,
+				Username: user.Username,
+				Password: "<PASSWORD>",
+			})
 		})
-	})
 	token, err := utils.GenerateJWT(resp.Email)
 	if err != nil {
 		return c.Status(500).SendString("Token generation failed")
@@ -42,13 +57,24 @@ func RegisterUser(c fiber.Ctx) error {
 		"status":   resp.Status, "token": token})
 }
 
-func GetUser(c fiber.Ctx) error {
-	resp, err := grpc.CallGrpcService(func(client protos.UserServiceClient) (*protos.UserResponse, error) {
-		return client.CheckUserExistance(context.Background(), &protos.UserRequest{Email: "John Doe"})
-	})
+func (us *UsersHandler) GetUser(c fiber.Ctx) error {
+	resp, err := grpc.CallGrpcService(
+		"localhost",
+		"50051",
+		protos.NewUserServiceClient,
+		func(client protos.UserServiceClient) (*protos.UserResponse, error) {
+			return client.CheckUserExistance(context.Background(), &protos.UserRequest{
+				Email: c.Params("email"),
+			})
+		},
+	)
 	if err != nil {
 		return c.Status(500).SendString("gRPC error: " + err.Error())
 	}
 
 	return c.JSON(fiber.Map{"user_exists": resp.Exists})
+}
+
+func (us *UsersHandler) CheckUser(c fiber.Ctx) error {
+	return c.Status(200).SendString("OK")
 }
